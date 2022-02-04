@@ -1,0 +1,17 @@
+body{
+    background-color: #343a40;
+}
+.container{
+    position: absolute;
+    display: flex;
+    justify-content: space-between;
+    width: 300px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%);
+}
+
+.container button{
+    all: unset;
+    cursor: pointer;
+}

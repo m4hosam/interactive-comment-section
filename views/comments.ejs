@@ -15,7 +15,7 @@
 <body>
 
     <div class="reply-card">
-        <img src="images/avatars/image-juliusomo.png" alt="">
+        <img src="images/avatars/image-<%= currentUsername %>.png" alt="">
         <form action="/reply" method="post">
             <textarea name="comment" id="replyed-comment">@user name, </textarea>
             <button>REPLY</button>
@@ -23,28 +23,42 @@
     </div>
 
     <div class="container">
-        <div class="basic-card">
-            <div class="score">
-                <div id="add" class="controller">+</div>
-                <div id="score-value">12</div>
-                <div id="minus" class="controller">–</div>
-            </div>
-            <div class="content">
-                <div class="card-header">
-                    <img class="avatar" src="images/avatars/image-amyrobson.png" alt="">
-                    <h5>amyrobson</h5>
-                    <h6>1 month ago</h6>
-                    <div class="reply">
-                        <img src="images/icon-reply.svg" alt="">
-                        Reply
+        <% for(let i=0 ;i < data.length ; i++){ %>
+            <div class="basic-card">
+                <div class="score">
+                    <div id="add" class="controller">+</div>
+                    <div id="score-value">
+                        <%= data[i].score %>
                     </div>
+                    <div id="minus" class="controller">–</div>
                 </div>
-                <p>
-                    Impressive! Though it seems the drag feature could be improved. But overall it looks incredible.
-                    You've nailed the design and the responsiveness at various breakpoints works really well.
-                </p>
+                <div class="content">
+                    <div class="card-header">
+                        <img class="avatar" src="images/avatars/image-<%= data[i].username %>.png" alt="">
+                        <h5>
+                            <%= data[i].username %>
+                        </h5>
+                        <h6>
+                            <%= data[i].createdAt %>
+                        </h6>
+                        <div class="reply">
+                            <img src="images/icon-reply.svg" alt="">
+                            Reply
+                        </div>
+                    </div>
+                    <p>
+                        <%= data[i].content %>
+                    </p>
+                </div>
             </div>
-        </div>
+            <% } %>
+                <div class="reply-card send-card">
+                    <img src="images/avatars/image-<%= currentUsername %>.png" alt="">
+                    <form action="/reply" method="post">
+                        <textarea name="comment" id="replyed-comment"></textarea>
+                        <button>SEND</button>
+                    </form>
+                </div>
 
 
 

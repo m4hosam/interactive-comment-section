@@ -17,8 +17,10 @@
     <div class="reply-card">
         <img src="images/avatars/image-<%= currentUsername %>.png" alt="">
         <form action="/reply" method="post">
-            <textarea name="comment" id="replyed-comment">@user name, </textarea>
-            <button>REPLY</button>
+            <textarea name="content" class="replyed-comment">@user name, </textarea>
+            <input type="text" class="repliedAt" name="repliedAt" style="display: none;">
+            <input type="text" class="commentId" name="commentId" style="display: none;">
+            <button name="username" value="<%= currentUsername %>">REPLY</button>
         </form>
     </div>
 
@@ -26,11 +28,11 @@
         <% for(let i=0 ;i < data.length ; i++){ %>
             <div class="basic-card">
                 <div class="score">
-                    <div id="add" class="controller">+</div>
-                    <div id="score-value">
+                    <div class="controller add">+</div>
+                    <div class="score-value">
                         <%= data[i].score %>
                     </div>
-                    <div id="minus" class="controller">–</div>
+                    <div class="controller minus">–</div>
                 </div>
                 <div class="content">
                     <div class="card-header">
@@ -41,7 +43,7 @@
                         <h6>
                             <%= data[i].createdAt %>
                         </h6>
-                        <div class="reply">
+                        <div class="reply" name="<%= data[i].username %>" id="<%= data[i]._id.valueOf() %>">
                             <img src="images/icon-reply.svg" alt="">
                             Reply
                         </div>
@@ -51,14 +53,51 @@
                     </p>
                 </div>
             </div>
-            <% } %>
-                <div class="reply-card send-card">
-                    <img src="images/avatars/image-<%= currentUsername %>.png" alt="">
-                    <form action="/reply" method="post">
-                        <textarea name="comment" id="replyed-comment"></textarea>
-                        <button>SEND</button>
-                    </form>
+            <% if(data[i].replies.length> 0){ %>
+                <!-- Replies Part -->
+                <div class="container-fluid">
+                    <!-- part of replies -->
+                    <% for(let j=0 ; j < data[i].replies.length ; j++){ %>
+                        <div class="basic-card">
+                            <div class="score">
+                                <div id="add" class="controller">+</div>
+                                <div id="score-value">
+                                    <%= data[i].replies[j].score %>
+                                </div>
+                                <div id="minus" class="controller">–</div>
+                            </div>
+                            <div class="content">
+                                <div class="card-header">
+                                    <img class="avatar"
+                                        src="images/avatars/image-<%= data[i].replies[j].username %>.png" alt="">
+                                    <h5>
+                                        <%= data[i].replies[j].username %>
+                                    </h5>
+                                    <h6>
+                                        <%= data[i].replies[j].createdAt %>
+                                    </h6>
+                                    <div class="reply">
+                                        <img src="images/icon-reply.svg" alt="">
+                                        Reply
+                                    </div>
+                                </div>
+                                <p>
+                                    <%= data[i].replies[j].content %>
+                                </p>
+                            </div>
+                        </div>
+                        <% } %>
                 </div>
+
+                <% } %>
+                    <% } %>
+                        <div class="reply-card send-card">
+                            <img src="images/avatars/image-<%= currentUsername %>.png" alt="">
+                            <form action="/newComment" method="post">
+                                <textarea name="content" id="newComment"></textarea>
+                                <button name="username" value="<%= currentUsername %>">SEND</button>
+                            </form>
+                        </div>
 
 
 

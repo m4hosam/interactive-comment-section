@@ -25,6 +25,7 @@ const users = ["amyrobson", "juliusomo", "maxblagun", "ramsesmiron"]
 
 const replySchema = new mongoose.Schema({
     id: Number,
+    repliedToId: String,
     content: String,
     createdAt: String,
     score: Number,
@@ -52,8 +53,9 @@ function CommentOb(id, content, createdAt, score, username, replies) {
     this.username = username;
     this.replies = replies;
 }
-function RepliesOb(id, content, createdAt, score, username, replyingTo) {
+function RepliesOb(id, content, createdAt, score, username, replyingTo, repliedToId) {
     this.id = id;
+    this.repliedToId = repliedToId;
     this.content = content;
     this.createdAt = createdAt;
     this.score = score;
@@ -72,6 +74,17 @@ function RepliesOb(id, content, createdAt, score, username, replyingTo) {
 //     username: "amyrobson",
 //     replies: []
 // })
+// newComment.save();
+
+// const newReply = new Comment({
+//     id: 1,
+//     content: "Impressive! Though it seems the drag feature could be improved. But overall it looks incredible. You've nailed the design and the responsiveness at various breakpoints works really well.",
+//     createdAt: "1 month ago",
+//     score: 12,
+//     username: "amyrobson",
+//     replies: [ObjectId("620659df7b566d956f1c37fc")]
+// })
+// newReply.save()
 
 
 
@@ -101,6 +114,8 @@ function RepliesOb(id, content, createdAt, score, username, replyingTo) {
 //     ]
 // })
 
+
+
 // newComment.save();
 // newComment2.save();
 // Comment.find({}).then(data => console.log(data));
@@ -121,7 +136,7 @@ app.get("/comments", function (req, res) {
         if (err)
             console.log(err)
         else {
-            console.log(docs[1]._id.valueOf())
+            // console.log(docs[1]._id.valueOf())
             res.render("comments", { currentId: currentuser, currentUsername: users[currentuser - 1], data: docs });
         }
     })
@@ -138,14 +153,67 @@ app.post("/newComment", async function (req, res) {
 // id, content, createdAt, score, username, replyingTo
 app.post("/reply", async function (req, res) {
     let newId = users.indexOf(req.body.username) + 1;
-    let obj = new RepliesOb(newId, req.body.content, "1 min ago", 0, req.body.username, req.body.repliedAt);
-    console.log(obj)
+    let obj = new RepliesOb(newId, req.body.content, "1 min ago", 0, req.body.username, req.body.repliedAt, req.body.commentId);
+    // console.log(obj)
     Comment.findById(req.body.commentId, async function (err, docs) {
         if (err)
             console.log(err)
         else {
-            docs.replies.push(obj)
+            const newReply = new Reply(obj)
+            await newReply.save();
+            docs.replies.push(newReply)
             await docs.save();
+            res.redirect('/comments');
+        }
+    })
+})
+
+
+
+app.post("/score", async function (req, res) {
+    console.log(req.body);
+    Comment.findById(req.body.commentId, async function (err, docs1) {
+        if (err)
+            console.log(err)
+        else if (docs1 == null) {
+            console.log("not found in comments");
+            Reply.findById(req.body.commentId, async function (err, docs2) {
+                if (err)
+                    console.log(err)
+                else if (docs2 == null) {
+                    console.log("not found Any where")
+                }
+                else {
+                    console.log(docs2.score)
+                    if (req.body.op == "add")
+                        docs2.score = docs2.score + 1;
+                    else if (req.body.op == "minus") {
+                        if (docs2.score > 0)
+                            docs2.score = docs2.score - 1;
+                    }
+                    else {
+                        console.log("Error");
+                        res.redirect('/comments');
+                    }
+                    console.log("-----" + docs2.score)
+                    await docs2.save()
+                    res.redirect('/comments');
+                }
+            })
+        }
+        else {
+            console.log(docs1.score)
+            if (req.body.op == "add")
+                docs1.score = docs1.score + 1;
+            else if (req.body.op == "minus") {
+                if (docs1.score > 0)
+                    docs1.score = docs1.score - 1;
+            }
+            else {
+                console.log("Error");
+                res.redirect('/comments');
+            }
+            await docs1.save()
             res.redirect('/comments');
         }
     })

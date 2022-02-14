@@ -39,7 +39,10 @@ const commentSchema = new mongoose.Schema({
     createdAt: String,
     score: Number,
     username: String,
-    replies: [replySchema]
+    replies: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Reply'
+    }]
 })
 
 const Comment = mongoose.model("Comment", commentSchema);
@@ -74,7 +77,20 @@ function RepliesOb(id, content, createdAt, score, username, replyingTo, repliedT
 //     username: "amyrobson",
 //     replies: []
 // })
+// const newReply = new Reply({
+//     id: 1,
+//     content: "Impressive! Though it seems the drag ",
+//     createdAt: "1 month ago",
+//     score: 12,
+//     username: "amyrobson",
+//     replyingTo: "Mohamed"
+// })
+// newReply.save()
+// newComment.replies.push(newReply);
 // newComment.save();
+// Comment.find({}).populate("replies").exec(function (err, data) {
+//     console.log(data[0].replies[0])
+// })
 
 // const newReply = new Comment({
 //     id: 1,
@@ -84,7 +100,7 @@ function RepliesOb(id, content, createdAt, score, username, replyingTo, repliedT
 //     username: "amyrobson",
 //     replies: [ObjectId("620659df7b566d956f1c37fc")]
 // })
-// newReply.save()
+// // newReply.save()
 
 
 
@@ -120,6 +136,17 @@ function RepliesOb(id, content, createdAt, score, username, replyingTo, repliedT
 // newComment2.save();
 // Comment.find({}).then(data => console.log(data));
 
+function elapsedTime() {
+    let start = new Date() // in the data base
+    // after spending time
+    let end = new Date()
+    let elapsed = end - start
+    console.log(start)
+    console.log(end)
+    console.log(elapsed / 1000)
+}
+
+
 app.get("/", function (req, res) {
     const name = "Mohamed Hosam";
     res.render("home", { data: name });
@@ -132,15 +159,24 @@ app.post("/", function (req, res) {
 })
 
 app.get("/comments", function (req, res) {
-    Comment.find(async function (err, docs) {
+    // populate used to excute the relateed database in replies
+    Comment.find({}).populate("replies").exec(async function (err, docs) {
         if (err)
             console.log(err)
         else {
-            // console.log(docs[1]._id.valueOf())
+            // console.log(data[0].replies[0]);
             res.render("comments", { currentId: currentuser, currentUsername: users[currentuser - 1], data: docs });
         }
     })
-    // console.log();
+    // Comment.find(async function (err, docs) {
+    //     if (err)
+    //         console.log(err)
+    //     else {
+
+    //         res.render("comments", { currentId: currentuser, currentUsername: users[currentuser - 1], data: docs });
+    //     }
+    // })
+    // // console.log();
 
 })
 app.post("/newComment", async function (req, res) {
@@ -171,7 +207,7 @@ app.post("/reply", async function (req, res) {
 
 
 app.post("/score", async function (req, res) {
-    console.log(req.body);
+    // console.log(req.body);
     Comment.findById(req.body.commentId, async function (err, docs1) {
         if (err)
             console.log(err)
@@ -218,6 +254,7 @@ app.post("/score", async function (req, res) {
         }
     })
 })
+
 
 
 app.listen(3000, function () {

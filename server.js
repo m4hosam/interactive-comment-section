@@ -25,7 +25,6 @@ const users = ["amyrobson", "juliusomo", "maxblagun", "ramsesmiron"]
 
 const replySchema = new mongoose.Schema({
     id: Number,
-    repliedToId: String,
     content: String,
     createdAt: String,
     score: Number,
@@ -58,7 +57,6 @@ function CommentOb(id, content, createdAt, score, username, replies) {
 }
 function RepliesOb(id, content, createdAt, score, username, replyingTo, repliedToId) {
     this.id = id;
-    this.repliedToId = repliedToId;
     this.content = content;
     this.createdAt = createdAt;
     this.score = score;
@@ -69,87 +67,55 @@ function RepliesOb(id, content, createdAt, score, username, replyingTo, repliedT
 
 
 
-// const newComment = new Comment({
-//     id: 1,
-//     content: "Impressive! Though it seems the drag feature could be improved. But overall it looks incredible. You've nailed the design and the responsiveness at various breakpoints works really well.",
-//     createdAt: "1 month ago",
-//     score: 12,
-//     username: "amyrobson",
-//     replies: []
-// })
-// const newReply = new Reply({
-//     id: 1,
-//     content: "Impressive! Though it seems the drag ",
-//     createdAt: "1 month ago",
-//     score: 12,
-//     username: "amyrobson",
-//     replyingTo: "Mohamed"
-// })
-// newReply.save()
-// newComment.replies.push(newReply);
+const newComment = new Comment({
+    id: 1,
+    content: "Impressive! Though it seems the drag feature could be improved. But overall it looks incredible. You've nailed the design and the responsiveness at various breakpoints works really well.",
+    createdAt: "Tue Feb 15 2022 17:35:51 GMT+0300 (GMT+03:00)",
+    score: 12,
+    username: "amyrobson",
+    replies: []
+})
+
+
 // newComment.save();
 // Comment.find({}).populate("replies").exec(function (err, data) {
 //     console.log(data[0].replies[0])
 // })
-
-// const newReply = new Comment({
-//     id: 1,
-//     content: "Impressive! Though it seems the drag feature could be improved. But overall it looks incredible. You've nailed the design and the responsiveness at various breakpoints works really well.",
-//     createdAt: "1 month ago",
-//     score: 12,
-//     username: "amyrobson",
-//     replies: [ObjectId("620659df7b566d956f1c37fc")]
-// })
-// // newReply.save()
-
-
-
-// const newComment2 = new Comment({
-//     id: 2,
-//     content: "Woah, your project looks awesome! How long have you been coding for? I'm still new, but think I want to dive into React as well soon. Perhaps you can give me an insight on where I can learn React? Thanks!",
-//     createdAt: "2 weeks ago",
-//     score: 5,
-//     username: "maxblagun",
-//     replies: [
-//         {
-//             id: 3,
-//             content: "If you're still new, I'd recommend focusing on the fundamentals of HTML, CSS, and JS before considering React. It's very tempting to jump ahead but lay a solid foundation first.",
-//             createdAt: "1 week ago",
-//             score: 4,
-//             replyingTo: "maxblagun",
-//             username: "ramsesmiron"
-//         },
-//         {
-//             id: 4,
-//             content: "I couldn't agree more with this. Everything moves so fast and it always seems like everyone knows the newest library/framework. But the fundamentals are what stay constant.",
-//             createdAt: "2 days ago",
-//             score: 2,
-//             replyingTo: "ramsesmiron",
-//             username: "juliusomo"
-//         }
-//     ]
-// })
-
 
 
 // newComment.save();
 // newComment2.save();
 // Comment.find({}).then(data => console.log(data));
 
-function elapsedTime() {
-    let start = new Date() // in the data base
-    // after spending time
-    let end = new Date()
-    let elapsed = end - start
-    console.log(start)
-    console.log(end)
-    console.log(elapsed / 1000)
+
+// let start = new Date("Tue Feb 15 2022 17:35:51 GMT+0300 (GMT+03:00)") 
+// let tmp = "Tue Feb 15 2022 17:35:51 GMT+0300 (GMT+03:00)";
+
+function elapsedTime(date) {
+    start = new Date(date) // in the data base
+    const end = new Date();
+    const elapsed = Math.floor((end - start) / 1000);
+    if (elapsed == 0)
+        return "1 second ago"
+    const years = Math.floor(elapsed / (3600 * 24 * 30 * 12));
+    const months = Math.floor(elapsed % (3600 * 24 * 30 * 12) / (3600 * 24 * 30));
+    const days = Math.floor(elapsed % (3600 * 24 * 30) / (3600 * 24));
+    const hours = Math.floor(elapsed % (3600 * 24) / 3600);
+    const mins = Math.floor(elapsed % 3600 / 60);
+    const seconds = Math.floor(elapsed % 60);
+    const timeString = ["years", "months", "days", "hours", "mins", "seconds"];
+    const time = [years, months, days, hours, mins, seconds];
+    let i = 0;
+    while (i < 6 && time[i] == 0) {
+        i++;
+    }
+    return time[i] + " " + timeString[i] + " ago";
 }
+// let start = "Tue Feb 15 2022 17:35:51 GMT+0300 (GMT+03:00)"
 
 
 app.get("/", function (req, res) {
-    const name = "Mohamed Hosam";
-    res.render("home", { data: name });
+    res.render("home");
 })
 
 app.post("/", function (req, res) {
@@ -164,24 +130,23 @@ app.get("/comments", function (req, res) {
         if (err)
             console.log(err)
         else {
-            // console.log(data[0].replies[0]);
+            for (let element of docs) {
+                element.createdAt = elapsedTime(element.createdAt);
+                console.log("element created at: " + element.createdAt)
+                if (element.replies.length > 0) {
+                    for (let replyElement of element.replies) {
+                        replyElement.createdAt = elapsedTime(replyElement.createdAt);
+                        console.log("reply created at: " + replyElement.createdAt)
+                    }
+                }
+            }
             res.render("comments", { currentId: currentuser, currentUsername: users[currentuser - 1], data: docs });
         }
     })
-    // Comment.find(async function (err, docs) {
-    //     if (err)
-    //         console.log(err)
-    //     else {
-
-    //         res.render("comments", { currentId: currentuser, currentUsername: users[currentuser - 1], data: docs });
-    //     }
-    // })
-    // // console.log();
-
 })
 app.post("/newComment", async function (req, res) {
     let newId = users.indexOf(req.body.username) + 1;
-    let obj = new CommentOb(newId, req.body.content, "1 min ago", 0, req.body.username, []);
+    let obj = new CommentOb(newId, req.body.content, (new Date()).toString(), 0, req.body.username, []);
     let d = new Comment(obj);
     await d.save();
     res.redirect('/comments');
@@ -189,7 +154,7 @@ app.post("/newComment", async function (req, res) {
 // id, content, createdAt, score, username, replyingTo
 app.post("/reply", async function (req, res) {
     let newId = users.indexOf(req.body.username) + 1;
-    let obj = new RepliesOb(newId, req.body.content, "1 min ago", 0, req.body.username, req.body.repliedAt, req.body.commentId);
+    let obj = new RepliesOb(newId, req.body.content, (new Date()).toString(), 0, req.body.username, req.body.repliedAt, req.body.commentId);
     // console.log(obj)
     Comment.findById(req.body.commentId, async function (err, docs) {
         if (err)

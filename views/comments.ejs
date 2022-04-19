@@ -17,12 +17,31 @@
     <div class="reply-card">
         <img src="images/avatars/image-<%= currentUsername %>.png" alt="">
         <form action="/reply" method="post">
-            <textarea name="content" class="replyed-comment">@user name, </textarea>
+            <textarea name="content" class="replyed-comment"></textarea>
             <input type="text" class="repliedAt" name="repliedAt" style="display: none;">
             <input type="text" class="commentId" name="commentId" style="display: none;">
             <button name="username" value="<%= currentUsername %>">REPLY</button>
         </form>
     </div>
+
+    <div class="black-back"></div>
+
+    <div class="delete-card">
+        <h2>Delete comment</h2>
+        <p>Are you sure you want to delete this comment? This will remove the comment and can't be undone.</p>
+        <form action="/delete" method="post">
+            <button id="cancel" type="reset">NO, CANCEL</button>
+            <button id="delete-btn" type="submit">YES, DELETE</button>
+        </form>
+    </div>
+
+
+    <form action="/edit" method="post" class="edit-card">
+        <textarea name="content" class="replyed-comment"></textarea>
+        <input type="text" class="idType" name="idType" style="display: none;">
+        <button name="id">UPDATE</button>
+    </form>
+
 
     <div class="container">
         <% for(let i=0 ;i < data.length ; i++){ %>
@@ -41,17 +60,34 @@
                         <h5>
                             <%= data[i].username %>
                         </h5>
-                        <h6>
-                            <%= data[i].createdAt %>
-                        </h6>
-                        <div class="reply" name="<%= data[i].username %>" id="<%= data[i]._id.valueOf() %>">
-                            <img src="images/icon-reply.svg" alt="">
-                            Reply
-                        </div>
+                        <% if(data[i].username==currentUsername){ %>
+                            <div class="self">
+                                you
+                            </div>
+                            <% } %>
+                                <h6>
+                                    <%= data[i].createdAt %>
+                                </h6>
+                                <% if(data[i].username==currentUsername){ %>
+                                    <button name="commentId" value="<%= data[i]._id.valueOf() %>" class="delete"><img
+                                            src="images/icon-delete.svg" alt="">Delete</button>
+
+                                    <button name="commentId" value="<%= data[i]._id.valueOf() %>" class="edit"><img
+                                            src="images/icon-edit.svg" alt=""> Edit</button>
+
+                                    <% }else{ %>
+                                        <div class="reply" name="<%= data[i].username %>"
+                                            id="<%= data[i]._id.valueOf() %>">
+                                            <img src="images/icon-reply.svg" alt="">
+                                            Reply
+                                        </div>
+                                        <% } %>
                     </div>
-                    <p>
+                    <p class="comment-content">
                         <%= data[i].content %>
                     </p>
+
+                    <!-- form  =textarea update button=-->
                 </div>
             </div>
             <% if(data[i].replies.length> 0){ %>
@@ -62,7 +98,7 @@
                         <div class="basic-card">
                             <form class="score" action="/score" method="post">
                                 <button name="op" value="add" class="controller add" type="submit">+</button>
-                                <input name="commentId" value="<%= data[i].replies[j]._id.valueOf() %>" type="text"
+                                <input name="replyId" value="<%= data[i].replies[j]._id.valueOf() %>" type="text"
                                     style="display: none;">
                                 <div class="score-value">
                                     <%= data[i].replies[j].score %>
@@ -76,16 +112,31 @@
                                     <h5>
                                         <%= data[i].replies[j].username %>
                                     </h5>
-                                    <h6>
-                                        <%= data[i].replies[j].createdAt %>
-                                    </h6>
-                                    <div class="reply" name="<%= data[i].replies[j].username %>"
-                                        id="<%= data[i]._id.valueOf() %>">
-                                        <img src="images/icon-reply.svg" alt="">
-                                        Reply
-                                    </div>
+                                    <% if(data[i].replies[j].username==currentUsername){ %>
+                                        <div class="self">
+                                            you
+                                        </div>
+                                        <% } %>
+                                            <h6>
+                                                <%= data[i].replies[j].createdAt %>
+                                            </h6>
+                                            <% if(data[i].replies[j].username==currentUsername){ %>
+                                                <button name="replyId" value="<%= data[i].replies[j]._id.valueOf() %>"
+                                                    class="delete"><img src="images/icon-delete.svg"
+                                                        alt="">Delete</button>
+
+                                                <button name="replyId" value="<%= data[i].replies[j]._id.valueOf() %>"
+                                                    class="edit"><img src="images/icon-edit.svg" alt=""> Edit</button>
+
+                                                <% }else{ %>
+                                                    <div class="reply" name="<%= data[i].replies[j].username %>"
+                                                        id="<%= data[i]._id.valueOf() %>">
+                                                        <img src="images/icon-reply.svg" alt="">
+                                                        Reply
+                                                    </div>
+                                                    <% } %>
                                 </div>
-                                <p>
+                                <p class="reply-content">
                                     <%= data[i].replies[j].content %>
                                 </p>
                             </div>

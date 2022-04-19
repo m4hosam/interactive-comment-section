@@ -4,6 +4,7 @@ const ejs = require("ejs");
 const bodyParser = require("body-parser")
 
 const mongoose = require("mongoose");
+
 mongoose.connect("mongodb://localhost:27017/commentsData", { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => {
         console.log('Conneccted To DataBase')
@@ -88,8 +89,6 @@ const newComment = new Comment({
 // Comment.find({}).then(data => console.log(data));
 
 
-// let start = new Date("Tue Feb 15 2022 17:35:51 GMT+0300 (GMT+03:00)") 
-// let tmp = "Tue Feb 15 2022 17:35:51 GMT+0300 (GMT+03:00)";
 
 function elapsedTime(date) {
     start = new Date(date) // in the data base
@@ -113,13 +112,50 @@ function elapsedTime(date) {
 }
 // let start = "Tue Feb 15 2022 17:35:51 GMT+0300 (GMT+03:00)"
 
+function getDataById(id) {
+    Comment.findById(id, async function (err, commentData) {
+        if (err)
+            console.log(err)
+        else if (commentData == null) {
+            console.log("not found in comments");
+            Reply.findById(id, async function (er, replyData) {
+                if (er)
+                    console.log(er)
+                else if (replyData == null) {
+                    console.log("not found Any where")
+                }
+                else {
+                    // Found in Reply
+                    return [{ type: "reply" }, replyData];
+                }
+            })
+        }
+        else {
+            // Found in comments
+            return [{ type: "comment" }, commentData];
+        }
+    })
+}
+function updateScore(type, comentData) {
+    if (type == "add")
+        comentData.score = comentData.score + 1;
+    else if (type == "minus") {
+        if (comentData.score > 0)
+            comentData.score = comentData.score - 1;
+    }
+    else {
+        console.log("Error");
+    }
+    return comentData;
+}
+
 
 app.get("/", function (req, res) {
     res.render("home");
 })
 
 app.post("/", function (req, res) {
-    console.log(req.body.id);
+    // console.log(req.body.id);
     currentuser = req.body.id;
     res.redirect('/comments');
 })
@@ -132,11 +168,11 @@ app.get("/comments", function (req, res) {
         else {
             for (let element of docs) {
                 element.createdAt = elapsedTime(element.createdAt);
-                console.log("element created at: " + element.createdAt)
+                // console.log("element created at: " + element.createdAt)
                 if (element.replies.length > 0) {
                     for (let replyElement of element.replies) {
                         replyElement.createdAt = elapsedTime(replyElement.createdAt);
-                        console.log("reply created at: " + replyElement.createdAt)
+                        // console.log("reply created at: " + replyElement.createdAt)
                     }
                 }
             }
@@ -158,68 +194,100 @@ app.post("/reply", async function (req, res) {
     // console.log(obj)
     Comment.findById(req.body.commentId, async function (err, docs) {
         if (err)
-            console.log(err)
+            console.log(err);
         else {
             const newReply = new Reply(obj)
             await newReply.save();
-            docs.replies.push(newReply)
+            docs.replies.push(newReply);
             await docs.save();
             res.redirect('/comments');
         }
     })
 })
 
-
+// getDataById(id)
 
 app.post("/score", async function (req, res) {
-    // console.log(req.body);
-    Comment.findById(req.body.commentId, async function (err, docs1) {
-        if (err)
-            console.log(err)
-        else if (docs1 == null) {
-            console.log("not found in comments");
-            Reply.findById(req.body.commentId, async function (err, docs2) {
-                if (err)
-                    console.log(err)
-                else if (docs2 == null) {
-                    console.log("not found Any where")
-                }
-                else {
-                    console.log(docs2.score)
-                    if (req.body.op == "add")
-                        docs2.score = docs2.score + 1;
-                    else if (req.body.op == "minus") {
-                        if (docs2.score > 0)
-                            docs2.score = docs2.score - 1;
-                    }
-                    else {
-                        console.log("Error");
-                        res.redirect('/comments');
-                    }
-                    console.log("-----" + docs2.score)
-                    await docs2.save()
-                    res.redirect('/comments');
-                }
-            })
-        }
-        else {
-            console.log(docs1.score)
-            if (req.body.op == "add")
-                docs1.score = docs1.score + 1;
-            else if (req.body.op == "minus") {
-                if (docs1.score > 0)
-                    docs1.score = docs1.score - 1;
-            }
-            else {
-                console.log("Error");
+    // Error
+    if (req.body.commentId == undefined) {
+        Reply.findById(req.body.replyId, async function (er, replyData) {
+            if (er)
+                console.log(er);
+            else if (replyData != null) {
+                replyData = updateScore(req.body.op, replyData);
+                await replyData.save();
                 res.redirect('/comments');
             }
-            await docs1.save()
-            res.redirect('/comments');
-        }
-    })
+        })
+    }
+    else {
+        Comment.findById(req.body.commentId, async function (err, commentData) {
+            if (err)
+                console.log(err);
+            else if (commentData != null) {
+                commentData = updateScore(req.body.op, commentData);
+                await commentData.save();
+                res.redirect('/comments');
+            }
+        })
+    }
+
 })
 
+app.post("/delete", async function (req, res) {
+    if (req.body.commentId == undefined) {
+        Reply.deleteOne({ _id: req.body.replyId }, async function (er) {
+            if (er)
+                console.log(er);
+        })
+    }
+    else {
+        Comment.findOneAndDelete({ _id: req.body.commentId }, async function (err, commentData) {
+            if (err)
+                console.log(err);
+            else {
+                for (const element of commentData.replies) {
+                    Reply.deleteOne({ _id: element._id }, async function (e) {
+                        if (e)
+                            console.log(e);
+                    })
+                }
+            }
+        })
+    }
+    res.redirect('/comments');
+})
+
+
+
+app.post("/edit", async function (req, res) {
+    if (req.body.idType == "commentId") {
+        Comment.findById(req.body.id, async function (err, commentData) {
+            if (err)
+                console.log(err);
+            else if (commentData != null) {
+                commentData.content = req.body.content;
+                commentData.createdAt = (new Date()).toString();
+                await commentData.save();
+                res.send(commentData);
+            }
+        })
+    }
+    else if (req.body.idType == "replyId") {
+        Reply.findById(req.body.id, async function (err, commentData) {
+            if (err)
+                console.log(err);
+            else if (commentData != null) {
+                commentData.content = req.body.content;
+                commentData.createdAt = (new Date()).toString();
+                await commentData.save();
+                res.send(commentData);
+            }
+        })
+    }
+
+    res.redirect('/comments');
+})
 
 
 app.listen(3000, function () {

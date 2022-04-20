@@ -13,6 +13,7 @@ body {
     left: 50%;
     transform: translate(-50%, 0);
     min-width: 40rem;
+    max-width: 40rem;
 }
 
 .basic-card {
@@ -28,6 +29,11 @@ body {
     display: flex;
     flex-grow: 1;
     flex-direction: column;
+    max-width: 34rem;
+}
+
+.reply-content {
+    max-width: 29rem;
 }
 
 .card-header {
@@ -108,6 +114,7 @@ body {
 
 .content p {
     color: hsl(211, 10%, 45%);
+    overflow-wrap: break-word;
 }
 
 .score {
@@ -314,4 +321,55 @@ body {
     margin-left: 24rem;
     margin-top: 1rem;
     cursor: pointer;
+}
+
+@media (max-width:660px) {
+    .container {
+        position: relative;
+        /* display: flex; */
+        /* flex-direction: column; */
+        left: 2rem;
+        transform: none;
+        transform: translate(-3rem, 0);
+        min-width: 80%;
+        margin-left: 2rem;
+    }
+
+    .container-fluid {
+        padding-left: 1rem;
+        margin-left: 0;
+        margin-top: 1rem;
+    }
+
+    .basic-card {
+        flex-direction: column-reverse;
+    }
+
+    .score {
+        flex-direction: row;
+        max-width: 4rem;
+        max-height: 2rem;
+    }
+
+    /* .card-header {
+        flex-wrap: wrap;
+    } */
+
+    /* .delete {
+        position: relative;
+        bottom: -4rem;
+        right: 0;
+    }
+
+    .reply {
+        position: relative;
+        bottom: -4rem;
+        right: 0;
+    }
+
+    .edit {
+        position: relative;
+        bottom: -4rem;
+        right: 0;
+    } */
 }

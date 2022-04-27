@@ -1,11 +1,10 @@
 const express = require("express");
 const app = express();
-const ejs = require("ejs");
 const bodyParser = require("body-parser")
 
 const mongoose = require("mongoose");
 
-mongoose.connect("mongodb://localhost:27017/commentsData", { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect("mongodb+srv://admin-m4hosam:Smi.Ho.154@cluster0.fr5st.mongodb.net/commentsData", { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => {
         console.log('Conneccted To DataBase')
     })
@@ -20,7 +19,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // access any other files withen ejs(css js images) to public directory
 app.use(express.static("public"))
 
-let currentuser = 0;
+let currentuser = -1;
 const users = ["amyrobson", "juliusomo", "maxblagun", "ramsesmiron"]
 
 
@@ -31,6 +30,7 @@ const replySchema = new mongoose.Schema({
     score: Number,
     replyingTo: String,
     username: String,
+    repliedToId: String
 })
 
 const commentSchema = new mongoose.Schema({
@@ -63,31 +63,8 @@ function RepliesOb(id, content, createdAt, score, username, replyingTo, repliedT
     this.score = score;
     this.username = username;
     this.replyingTo = replyingTo;
+    this.repliedToId = repliedToId;
 }
-
-
-
-
-const newComment = new Comment({
-    id: 1,
-    content: "Impressive! Though it seems the drag feature could be improved. But overall it looks incredible. You've nailed the design and the responsiveness at various breakpoints works really well.",
-    createdAt: "Tue Feb 15 2022 17:35:51 GMT+0300 (GMT+03:00)",
-    score: 12,
-    username: "amyrobson",
-    replies: []
-})
-
-
-// newComment.save();
-// Comment.find({}).populate("replies").exec(function (err, data) {
-//     console.log(data[0].replies[0])
-// })
-
-
-// newComment.save();
-// newComment2.save();
-// Comment.find({}).then(data => console.log(data));
-
 
 
 function elapsedTime(date) {
@@ -112,30 +89,6 @@ function elapsedTime(date) {
 }
 // let start = "Tue Feb 15 2022 17:35:51 GMT+0300 (GMT+03:00)"
 
-function getDataById(id) {
-    Comment.findById(id, async function (err, commentData) {
-        if (err)
-            console.log(err)
-        else if (commentData == null) {
-            console.log("not found in comments");
-            Reply.findById(id, async function (er, replyData) {
-                if (er)
-                    console.log(er)
-                else if (replyData == null) {
-                    console.log("not found Any where")
-                }
-                else {
-                    // Found in Reply
-                    return [{ type: "reply" }, replyData];
-                }
-            })
-        }
-        else {
-            // Found in comments
-            return [{ type: "comment" }, commentData];
-        }
-    })
-}
 function updateScore(type, comentData) {
     if (type == "add")
         comentData.score = comentData.score + 1;
@@ -155,30 +108,31 @@ app.get("/", function (req, res) {
 })
 
 app.post("/", function (req, res) {
-    // console.log(req.body.id);
     currentuser = req.body.id;
     res.redirect('/comments');
 })
 
 app.get("/comments", function (req, res) {
     // populate used to excute the relateed database in replies
-    Comment.find({}).populate("replies").exec(async function (err, docs) {
-        if (err)
-            console.log(err)
-        else {
-            for (let element of docs) {
-                element.createdAt = elapsedTime(element.createdAt);
-                // console.log("element created at: " + element.createdAt)
-                if (element.replies.length > 0) {
-                    for (let replyElement of element.replies) {
-                        replyElement.createdAt = elapsedTime(replyElement.createdAt);
-                        // console.log("reply created at: " + replyElement.createdAt)
+    if (currentuser == -1)
+        res.redirect('/');
+    else {
+        Comment.find({}).populate("replies").exec(async function (err, docs) {
+            if (err)
+                console.log(err)
+            else {
+                for (let element of docs) {
+                    element.createdAt = elapsedTime(element.createdAt);
+                    if (element.replies.length > 0) {
+                        for (let replyElement of element.replies) {
+                            replyElement.createdAt = elapsedTime(replyElement.createdAt);
+                        }
                     }
                 }
+                res.render("comments", { currentId: currentuser, currentUsername: users[currentuser - 1], data: docs });
             }
-            res.render("comments", { currentId: currentuser, currentUsername: users[currentuser - 1], data: docs });
-        }
-    })
+        })
+    }
 })
 app.post("/newComment", async function (req, res) {
     let newId = users.indexOf(req.body.username) + 1;
@@ -187,7 +141,8 @@ app.post("/newComment", async function (req, res) {
     await d.save();
     res.redirect('/comments');
 })
-// id, content, createdAt, score, username, replyingTo
+
+// id, content, createdAt, score, username, replyingTo, repliedToId
 app.post("/reply", async function (req, res) {
     let newId = users.indexOf(req.body.username) + 1;
     let obj = new RepliesOb(newId, req.body.content, (new Date()).toString(), 0, req.body.username, req.body.repliedAt, req.body.commentId);
@@ -205,7 +160,7 @@ app.post("/reply", async function (req, res) {
     })
 })
 
-// getDataById(id)
+
 
 app.post("/score", async function (req, res) {
     // Error
@@ -290,6 +245,6 @@ app.post("/edit", async function (req, res) {
 })
 
 
-app.listen(3000, function () {
+app.listen(process.env.PORT || 3000, function () {
     console.log("Connected To The Server");
 })

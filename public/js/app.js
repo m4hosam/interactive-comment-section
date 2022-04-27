@@ -76,7 +76,7 @@ const mediaQuery = window.matchMedia('(max-width: 660px)')
 function handleTabletChange(e) {
     // Check if the media query is true
     if (e.matches) {
-        console.log('Media Query Matched!');
+        // 'Media Query Matched!
         const replyCards = document.querySelectorAll(".reply-card");
 
         // move Reply Edit Delete button to the score Div
@@ -106,7 +106,7 @@ function handleTabletChange(e) {
         }
     }
     else {
-        console.log('returned to initials')
+        // returned to initials
         const replyCards = document.querySelectorAll(".reply-card");
         // Back Reply Edit Delete button to initials
         for (const element of scoreDiv) {
@@ -129,8 +129,6 @@ function handleTabletChange(e) {
             const replyButtonz = card.querySelector("button");
             const logoImgz = card.querySelector("img");
             const cardNeeded = card.querySelector("form");
-            // console.log(card);
-            // console.log(node);
             cardNeeded.prepend(logoImgz);
             cardNeeded.appendChild(replyButtonz);
             if (node != null)

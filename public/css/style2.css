@@ -345,6 +345,10 @@ body {
     opacity: 50%;
 }
 
+.m4hosam a:hover {
+    opacity: 90%;
+}
+
 @media (max-width:660px) {
     .container {
         position: relative;

@@ -4,3 +4,5 @@ User can choose the character that will comment then inside the comments he can 
 Every thing linked with the DataBase using "mongoose" 
 Server was built using 'Express' and 'node.js'
 Templeting using 'EJS'
+<br>
+[preview](https://radiant-gorge-15308.herokuapp.com/)

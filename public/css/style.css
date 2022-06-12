@@ -1,17 +1,27 @@
-body{
+body {
     background-color: #343a40;
 }
-.container{
+
+h1 {
+    text-align: center;
+    color: white;
+    opacity: 80%;
+    margin-top: 15rem;
+    font-family: 'Rubik', sans-serif;
+    font-size: 25px;
+}
+
+.container {
     position: absolute;
     display: flex;
     justify-content: space-between;
     width: 300px;
     left: 50%;
     top: 50%;
-    transform: translate(-50%,-50%);
+    transform: translate(-50%, -50%);
 }
 
-.container button{
+.container button {
     all: unset;
     cursor: pointer;
 }

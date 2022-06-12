@@ -224,7 +224,7 @@ app.post("/edit", async function (req, res) {
                 commentData.content = req.body.content;
                 commentData.createdAt = (new Date()).toString();
                 await commentData.save();
-                res.send(commentData);
+                res.redirect('/comments');
             }
         })
     }
@@ -236,12 +236,10 @@ app.post("/edit", async function (req, res) {
                 commentData.content = req.body.content;
                 commentData.createdAt = (new Date()).toString();
                 await commentData.save();
-                res.send(commentData);
+                res.redirect('/comments');
             }
         })
     }
-
-    res.redirect('/comments');
 })
 
 

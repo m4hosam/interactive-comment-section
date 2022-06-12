@@ -51,7 +51,14 @@ for (let j = 0; j < editBtns.length; j++) {
     editBtns[j].addEventListener("click", function () {
         if (!pressedEditButtons.includes(j)) {
             const clonededit = editCard.cloneNode(true);
-            const pElement = this.parentElement.parentElement.querySelector(".reply-content");
+            const pElementReply = this.parentElement.parentElement.querySelector(".reply-content");
+            const pElementComment = this.parentElement.parentElement.querySelector(".comment-content");
+            if (pElementReply == null) {
+                var pElement = pElementComment;
+                // console.log(pElement)
+            }
+            else
+                var pElement = pElementReply;
             var commentContent = pElement.textContent;
             clonededit.querySelector('.replyed-comment').textContent = commentContent.trim();
             clonededit.querySelector('button').setAttribute("value", this.getAttribute('value'));

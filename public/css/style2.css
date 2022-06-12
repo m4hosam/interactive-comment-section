@@ -324,13 +324,11 @@ body {
 }
 
 .m4hosam {
-    position: absolute;
-    left: 50%;
-    transform: translate(-50%, 0);
-    text-align: center;
+    min-width: calc(100%-1rem);
+    max-width: calc(100%-1rem);
     display: flex;
     align-items: center;
-    padding: 1rem 0;
+    padding: 1rem 1rem;
 }
 
 .m4hosam img {
@@ -345,8 +343,14 @@ body {
     opacity: 50%;
 }
 
+.m4hosam a:nth-of-type(2) {
+    color: red;
+    margin-left: auto;
+}
+
 .m4hosam a:hover {
     opacity: 90%;
+    transform: translateY(-1px);
 }
 
 @media (max-width:660px) {
